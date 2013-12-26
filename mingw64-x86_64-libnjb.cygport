@@ -1,0 +1,22 @@
+CROSS_HOST="x86_64-w64-mingw32"
+inherit cross
+
+NAME="mingw64-x86_64-libnjb"
+VERSION=2.2.7
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="Nomad JukeBox device library for Win64 toolchain"
+DESCRIPTION="libnjb is a C library and API for communicating with the
+Creative Nomad JukeBox and Dell DJ digital audio players under BSD, Linux,
+Mac OS X and Windows. The protocol these devices use is presumably called
+PDE (Portable Digital Entertainment protocol) at Creative."
+HOMEPAGE="http://libnjb.sourceforge.net/"
+SRC_URI="mirror://sourceforge/libnjb/libnjb-${VERSION}.tar.gz"
+SRC_DIR="libnjb-${VERSION}"
+PATCH_URI="2.2.7-build.patch"
+
+DISTCLEANFILES="libnjb.pc src/libnjb.h"
+
+CPPFLAGS+=" $($PKG_CONFIG --cflags libusb)"
+CYGCONF_ARGS="ac_cv_prog_HAVE_DOXYGEN=false ac_cv_func_malloc_0_nonnull=yes"
+MAKEOPTS+=" bin_PROGRAMS= "

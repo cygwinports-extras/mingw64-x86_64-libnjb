@@ -1,0 +1,51 @@
+--- origsrc/libnjb-2.2.7/configure.ac	2011-06-25 07:04:54.000000000 -0500
++++ src/libnjb-2.2.7/configure.ac	2013-12-26 01:37:52.753696500 -0600
+@@ -50,7 +50,7 @@ AM_CONDITIONAL(COMPILE_MINGW32, [test "$
+ 
+ 
+ # Checks for libraries.
+-AC_CHECK_LIB([curses], [initscr], AC_SUBST([CURSESPLAY], cursesplay))
++AC_CHECK_LIB([curses], [initscr], AC_SUBST([CURSESPLAY], "cursesplay\$(EXEEXT)"))
+ AC_CHECK_LIB([usb], [usb_control_msg],,
+ 	AC_MSG_ERROR([I can't find the libusb libraries on your system. You
+ 	may need to set the LDFLAGS environment variable to include the
+--- origsrc/libnjb-2.2.7/src/Makefile.am	2011-06-25 07:08:30.000000000 -0500
++++ src/libnjb-2.2.7/src/Makefile.am	2013-12-26 01:42:44.581585900 -0600
+@@ -38,18 +38,15 @@ SOVERSION=$(CURRENT):$(REVISION):$(AGE)
+ libnjb_la_LDFLAGS=@LDFLAGS@ -version-info $(SOVERSION)
+ 
+ if COMPILE_MINGW32
+-noinst_DATA=libnjb.lib
+-libnjb_la_LDFLAGS += -export-dynamic -no-undefined -export-symbols libnjb.sym
++noinst_DATA=libnjb.def
++libnjb_la_LDFLAGS += -export-dynamic -no-undefined -export-symbols $(srcdir)/libnjb.sym
+ libnjb.def: libnjb.sym
+ 	echo "LIBRARY \"@PACKAGE@\"" > libnjb.def
+ 	echo "DESCRIPTION \"Creative NOMAD, Zen, Dell DJ Library\"" >> libnjb.def
+ 	echo "VERSION @VERSION@" >> libnjb.def
+ 	echo >> libnjb.def
+ 	echo "EXPORTS" >> libnjb.def
+-	cat libnjb.sym >> libnjb.def
+-libnjb.lib: libnjb.la libnjb.def
+-	lib -name:libnjb-$(LT_CURRENT_MINUS_AGE).dll -def:libnjb.def -out:$@
+-install-data-local: libnjb.lib libnjb.def
++	cat $(srcdir)/libnjb.sym >> libnjb.def
++install-data-hook: libnjb.def
+ 	$(INSTALL) libnjb.def $(DESTDIR)$(libdir)
+-	$(INSTALL) libnjb.lib $(DESTDIR)$(libdir)
+ endif
+--- origsrc/libnjb-2.2.7/src/libnjb.h.in	2007-11-10 18:06:29.000000000 -0600
++++ src/libnjb-2.2.7/src/libnjb.h.in	2013-12-26 01:51:09.501784700 -0600
+@@ -31,11 +31,9 @@
+ /* Windows specific code, types that do not exist in Windows
+  * sys/types.h
+  */
+-typedef char int8_t;
++#include <stdint.h>
+ typedef unsigned char u_int8_t;
+-typedef __int16 int16_t;
+ typedef unsigned __int16 u_int16_t;
+-typedef __int32 int32_t;
+ typedef unsigned __int32 u_int32_t;
+ typedef unsigned __int64 u_int64_t;
+ #endif
